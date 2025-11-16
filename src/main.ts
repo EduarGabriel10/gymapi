@@ -15,18 +15,25 @@ async function bootstrap() {
         'https://gymapi-c6v8.onrender.com',
       ];
   
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true); // permitir
+      console.log('🔍 Origin recibido:', origin);
+  
+      // Permitir requests sin origin (por ejemplo: apps móviles, Postman, Render)
+      if (!origin) {
+        return callback(null, true);
+      }
+  
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'), false); // bloquear
+        console.log('❌ Origen bloqueado por CORS:', origin);
+        return callback(new Error('Not allowed by CORS'), false);
       }
     },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
   });
+
 
   
   app.setGlobalPrefix('api');
