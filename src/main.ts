@@ -6,9 +6,18 @@ async function bootstrap() {
 
 
   app.enableCors({
-    origin: ['*'],
+    origin: [
+      'http://localhost:8100',
+      'capacitor://localhost',
+      'ionic://localhost',
+      'http://localhost',
+      'https://gymapi-c6v8.onrender.com', // opcional
+      '*', // si quieres permitir todos temporalmente
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
   });
-
+  
   app.setGlobalPrefix('api');
 
   await app.listen(process.env.PORT ?? 3000);
