@@ -6,17 +6,28 @@ async function bootstrap() {
 
 
   app.enableCors({
-    origin: [
-      'http://localhost:8100',
-      'capacitor://localhost',
-      'ionic://localhost',
-      'http://localhost',
-      'https://gymapi-c6v8.onrender.com', // opcional
-      '*', // si quieres permitir todos temporalmente
-    ],
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        'http://localhost:8100',
+        'http://localhost',
+        'capacitor://localhost',
+        'ionic://localhost',
+        'https://gymapi-c6v8.onrender.com',
+      ];
+  
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true); // permitir
+      } else {
+        callback(new Error('Not allowed by CORS'), false); // bloquear
+      }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
+
   
   app.setGlobalPrefix('api');
 
