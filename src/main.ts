@@ -9,7 +9,7 @@ async function bootstrap() {
     origin: (origin, callback) => {
       const allowedOrigins = [
         'http://localhost:8100',
-        'http://localhost',
+        'https://localhost',
         'capacitor://localhost',
         'ionic://localhost',
         'https://gymapi-c6v8.onrender.com',
