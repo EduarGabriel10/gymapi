@@ -1,0 +1,130 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// MODELO DE ROLES
+
+model Roles {
+  id_rol   Int        @id @default(autoincrement())
+  nombre   String     @db.VarChar(50)
+  Usuarios Usuarios[]   
+}
+
+// MODELO DE USUARIOS
+model Usuarios {
+  id_usuario   Int            @id @default(autoincrement())
+  username     String         @unique @db.VarChar(50)
+  password     String         @db.VarChar(255)
+  id_rol       Int
+  rol          Roles          @relation(fields: [id_rol], references: [id_rol])
+  Entrenadores Entrenadores[] 
+  Clientes     Clientes[]     
+}
+
+// MODELO DE ENTRENADORES
+model Entrenadores {
+  id_entrenador Int        @id @default(autoincrement())
+  nombre        String     @db.VarChar(100)
+  apellido      String     @db.VarChar(100)
+  especialidad  String?    @db.VarChar(100)
+  telefono      String?    @db.VarChar(20)
+  email         String?    @db.VarChar(100)
+  id_usuario    Int?       @unique // Un usuario solo puede estar ligado a un entrenador
+  usuario       Usuarios?  @relation(fields: [id_usuario], references: [id_usuario])
+
+  Clientes              Clientes[]              
+  Rutinas               Rutinas[]               
+  Horarios_Entrenadores Horarios_Entrenadores[] 
+}
+
+// MODELO DE CLIENTES
+model Clientes {
+  id_cliente       Int          @id @default(autoincrement())
+  nombre           String       @db.VarChar(100)
+  apellido         String       @db.VarChar(100)
+  cedula           String       @unique @db.VarChar(20)
+  telefono         String?      @db.VarChar(20)
+  email            String?      @db.VarChar(100)
+  estado_membresia String?      @default("inactiva") @db.VarChar(20)
+  id_entrenador    Int?
+  id_usuario       Int?         @unique // Un usuario solo puede estar ligado a un cliente
+  entrenador       Entrenadores? @relation(fields: [id_entrenador], references: [id_entrenador])
+  usuario          Usuarios?     @relation(fields: [id_usuario], references: [id_usuario])
+
+  Pagos      Pagos[]      
+  Asistencia Asistencia[] 
+  Rutinas    Rutinas[]    
+
+  @@index([id_entrenador])
+  @@index([id_usuario])
+}
+
+// MODELO DE MEMBRESÍAS
+
+model Membresias {
+  id_membresia  Int     @id @default(autoincrement())
+  tipo          String  @db.VarChar(50)
+  precio        Decimal @db.Decimal(10, 2)
+  duracion_dias Int
+  Pagos         Pagos[] 
+}
+
+// MODELO DE PAGOS
+model Pagos {
+  id_pago           Int        @id @default(autoincrement())
+  id_cliente        Int
+  id_membresia      Int
+  fecha_pago        DateTime   @db.Date
+  fecha_vencimiento DateTime   @db.Date
+  monto             Decimal    @db.Decimal(10, 2)
+  cliente           Clientes   @relation(fields: [id_cliente], references: [id_cliente])
+  membresia         Membresias @relation(fields: [id_membresia], references: [id_membresia])
+
+  @@index([id_cliente])
+  @@index([id_membresia])
+}
+
+// MODELO DE ASISTENCIA
+model Asistencia {
+  id_asistencia Int      @id @default(autoincrement())
+  id_cliente    Int
+  fecha         DateTime @db.Date
+  hora          DateTime @db.Time
+  cliente       Clientes @relation(fields: [id_cliente], references: [id_cliente])
+
+  @@index([id_cliente])
+}
+
+// MODELO DE RUTINAS
+model Rutinas {
+  id_rutina        Int          @id @default(autoincrement())
+  id_cliente       Int
+  id_entrenador    Int
+  nivel            String?      @db.VarChar(50)
+  descripcion      String?      @db.Text
+  fecha_asignacion DateTime     @db.Date
+  cliente          Clientes     @relation(fields: [id_cliente], references: [id_cliente])
+  entrenador       Entrenadores @relation(fields: [id_entrenador], references: [id_entrenador])
+
+  @@index([id_cliente])
+  @@index([id_entrenador])
+}
+
+// MODELO DE HORARIOS DE ENTRENADORES
+model Horarios_Entrenadores {
+  id_horario    Int          @id @default(autoincrement())
+  id_entrenador Int
+  dia           String       @db.VarChar(20)
+  hora_inicio   DateTime     @db.Time
+  hora_fin      DateTime     @db.Time
+  entrenador    Entrenadores @relation(fields: [id_entrenador], references: [id_entrenador])
+
+  @@index([id_entrenador])
+}
